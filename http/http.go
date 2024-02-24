@@ -7,12 +7,14 @@ import (
 	"os"
 )
 
-func InitServer() {
-	const HOST = "localhost"
-	const PORT = "8080"
-	const TYPE = "tcp"
+type Server struct {
+	Host string
+	Port string
+}
 
-	listen, err := net.Listen(TYPE, HOST+":"+PORT)
+func (s Server) InitServer() {
+
+	listen, err := net.Listen("tcp", s.Host+":"+s.Port)
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
@@ -20,7 +22,7 @@ func InitServer() {
 
 	defer listen.Close()
 
-	fmt.Println("Server is listening on port 8080")
+	fmt.Printf("Server is listening on port %v", s.Port)
 
 	for {
 		conn, err := listen.Accept()
