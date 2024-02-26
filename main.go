@@ -11,6 +11,5 @@ func main() {
 		Port: "8080",
 	}
 
-	s.InitServer()
-
+	s.StartServer()
 }

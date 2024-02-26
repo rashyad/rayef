@@ -3,8 +3,9 @@ package http
 import (
 	"fmt"
 	"log"
-	"net"
-	"os"
+	"net/http"
+	c "rayef/controller"
+	"time"
 )
 
 type Server struct {
@@ -12,43 +13,17 @@ type Server struct {
 	Port string
 }
 
-func (s Server) InitServer() {
+func (s Server) StartServer() {
 
-	listen, err := net.Listen("tcp", s.Host+":"+s.Port)
-	if err != nil {
-		log.Fatal(err)
-		os.Exit(1)
+	myHandler := c.RegisterController()
+	server := &http.Server{
+		Addr:           s.Host + ":" + s.Port,
+		Handler:        myHandler,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
 	}
 
-	defer listen.Close()
-
-	fmt.Printf("Server is listening on port %v", s.Port)
-
-	for {
-		conn, err := listen.Accept()
-		if err != nil {
-			log.Fatal(err)
-			os.Exit(1)
-		}
-
-		go HandleRequest(conn)
-	}
-}
-
-func HandleRequest(conn net.Conn) {
-	defer conn.Close()
-	// Create a buffer to read data into
-	buffer := make([]byte, 1024)
-
-	for {
-		// Read data from the client
-		n, err := conn.Read(buffer)
-		if err != nil {
-			fmt.Println("Error:", err)
-			return
-		}
-
-		// Process and use the data (here, we'll just print it)
-		fmt.Printf("Received: %s\n", buffer[:n])
-	}
+	fmt.Print("Server is now listening at port ", s.Port, "\n")
+	log.Fatal(server.ListenAndServe())
 }
